@@ -64,17 +64,21 @@ class APICollectionViewController: UICollectionViewController {
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! APICollectionViewCell
+        print("cellForRow")
         
         let selectCell = apiTest[indexPath.item]
         
         if let url = URL(string: selectCell.thumbnailUrl) {
-            URLSession.shared.dataTask(with: url) { (data, response, error) in
+            cell.downloadImageTask?.cancel()
+            let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
                 if let data = data, let image = UIImage(data: data) {
                     DispatchQueue.main.async {
                         cell.imageView.image = image
                     }
                 }
-            }.resume()
+            }
+            task.resume()
+            cell.downloadImageTask = task
         }
         
         cell.idLabel.text = String(selectCell.id)
